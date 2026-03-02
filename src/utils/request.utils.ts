@@ -7,6 +7,7 @@ class RequestUtils {
             try {
                 return await func(c, next);
             } catch (err) {
+                console.log(err);
                 if (err instanceof HTTPException) {
                     throw err;
                 }

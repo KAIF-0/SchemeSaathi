@@ -17,7 +17,6 @@ class AppRoutes {
             });
         }));
 
-        this.app.get('/webhook', RequestUtils.asyncHandler(async (c) => WebhookController.verify(c)));
         this.app.post('/webhook', RequestUtils.asyncHandler(async (c) => WebhookController.receive(c)));
     }
 }

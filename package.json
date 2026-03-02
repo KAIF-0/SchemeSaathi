@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
-    "dev": "bun run --hot index.ts"
+    "dev": "bun run --hot index.ts",
+    "seed:schemes": "bun run seed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -14,6 +15,10 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "hono": "^4.12.3"
+    "@langchain/google-genai": "^2.1.22",
+    "@langchain/langgraph": "^1.2.0",
+    "@upstash/vector": "^1.2.2",
+    "hono": "^4.12.3",
+    "twilio": "^5.12.2"
   }
 }

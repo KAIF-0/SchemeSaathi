@@ -1,40 +1,53 @@
 import type { Context } from 'hono';
-import EnvConfig from '../config/env.config';
-import type { WhatsAppWebhookPayload } from '../types/webhook.types';
-import WhatsAppService from '../services/whatsapp.service';
+import type { TwilioWebhookBody } from '../types/webhook.types';
+import MessageService from '../services/message.service';
+import TwilioWhatsAppService from '../services/twilio-whatsapp.service';
 
 class WebhookController {
-    private static readonly whatsAppService = new WhatsAppService(
-        EnvConfig.WHATSAPP_ACCESS_TOKEN,
-        EnvConfig.WHATSAPP_PHONE_NUMBER_ID
-    );
-
-    public static verify(c: Context) {
-        const mode = c.req.query('hub.mode');
-        const token = c.req.query('hub.verify_token');
-        const challenge = c.req.query('hub.challenge');
-
-        if (mode === 'subscribe' && token === EnvConfig.WHATSAPP_VERIFY_TOKEN && challenge) {
-            return c.text(challenge, 200);
-        }
-
-        return c.text('Forbidden', 403);
-    }
+    private static readonly twilioWhatsAppService = new TwilioWhatsAppService();
+    private static readonly messageService = new MessageService();
 
     public static async receive(c: Context): Promise<Response> {
-        const payload = await c.req.json<WhatsAppWebhookPayload>();
-        const incomingMessage = WebhookController.whatsAppService.parseIncomingMessage(payload);
+        const rawBody = await c.req.parseBody();
+        const payload: TwilioWebhookBody = {
+            Body: WebhookController.getFormField(rawBody, 'Body'),
+            From: WebhookController.getFormField(rawBody, 'From'),
+        };
+
+        const incomingMessage = WebhookController.twilioWhatsAppService.parseIncomingMessage(payload);
 
         if (!incomingMessage) {
-            return c.body(null, 200);
+            const emptyXmlResponse = WebhookController.twilioWhatsAppService.createXmlResponse();
+            return c.body(emptyXmlResponse, 200, {
+                'Content-Type': 'text/xml',
+            });
         }
 
-        // console.log(incomingMessage.text);
+        console.log('Message from:', incomingMessage.from);
+        console.log('Text:', incomingMessage.text);
 
-        const reply = `You said: ${incomingMessage.text}`;
-        await WebhookController.whatsAppService.sendTextMessage(incomingMessage.from, reply);
+        const reply = await WebhookController.messageService.generateReply(
+            incomingMessage.phoneNumber,
+            incomingMessage.text
+        );
+        const xmlResponse = WebhookController.twilioWhatsAppService.createXmlResponse(reply);
 
-        return c.body(null, 200);
+        return c.body(xmlResponse, 200, {
+            'Content-Type': 'text/xml',
+        });
+    }
+
+    private static getFormField(
+        formBody: Record<string, string | File | (string | File)[]>,
+        key: string
+    ): string | undefined {
+        const value = formBody[key];
+
+        if (typeof value === 'string') {
+            return value;
+        }
+
+        return undefined;
     }
 }
 

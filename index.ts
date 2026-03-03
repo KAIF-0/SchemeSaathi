@@ -1,6 +1,6 @@
 import app from "./src/main"
 
 Bun.serve({
-    port: 5000,
+    port: 8080,
     fetch: app.fetch,
 })

@@ -1,0 +1,29 @@
+services:
+   schemesathi-backend:
+     build: 
+        context: .
+        dockerfile: Dockerfile
+     restart: unless-stopped
+     env_file: .env 
+     networks:
+       - schemesathi-network   
+
+   reverse-proxy:
+     image: caddy:latest
+     container_name: caddy
+     ports:
+       - "80:80"
+       - "443:443"
+     volumes:
+       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+     depends_on:
+       - schemesathi-backend
+     networks:
+       - schemesathi-network
+
+
+networks:
+  schemesathi-network:
+    driver: bridge
+
+

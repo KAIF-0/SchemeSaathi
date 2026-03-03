@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun run --hot index.ts",
+    "lint": "bun tsc --init",
     "seed:schemes": "bun run seed.ts"
   },
   "devDependencies": {

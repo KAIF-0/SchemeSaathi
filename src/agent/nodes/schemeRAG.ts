@@ -21,7 +21,7 @@ export async function schemeRAG(state: AgentState): Promise<Partial<AgentState>>
     const searchQuery = detailSchemeName
         ? baseQuery
         : buildProfileAwareSearchQuery(baseQuery, state.profile ?? {});
-    const matches = await upstashMemoryService.querySchemes(searchQuery, detailSchemeName ? 5 : 10);
+    const matches = await upstashMemoryService.querySchemes(searchQuery, 5);
     const retrievedSchemes = extractSchemes(matches);
 
     const schemesContext = retrievedSchemes

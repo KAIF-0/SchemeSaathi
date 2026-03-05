@@ -15,7 +15,7 @@ export async function respond(state: AgentState): Promise<Partial<AgentState>> {
     }
 
     const preferredLanguage = state.profile?.preferredLanguage === 'hindi' ? 'Hindi' : 'English';
-
+    console.log(state.memoryContext);
     const response = await llmService.generate(
         'You are a helpful WhatsApp assistant for Indian welfare scheme support. Return plain text only with no markdown.',
         [

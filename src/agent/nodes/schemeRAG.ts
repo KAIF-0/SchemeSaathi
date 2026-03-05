@@ -9,7 +9,7 @@ export async function schemeRAG(state: AgentState): Promise<Partial<AgentState>>
         };
     }
 
-    const matches = await upstashMemoryService.querySchemes(state.userMessage, 5);
+    const matches = await upstashMemoryService.querySchemes(state.userMessage, 10);
 
     const schemesContext = matches
         .map((match, index) => {

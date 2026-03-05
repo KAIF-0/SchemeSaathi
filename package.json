@@ -7,7 +7,9 @@
     "start": "bun run index.ts",
     "dev": "bun run --hot index.ts",
     "lint": "bunx tsc --init",
-    "seed:schemes": "bun run seed.ts"
+    "seed:schemes": "bun run scripts/seed.ts",
+    "cleanup:schemes": "bun run scripts/cleanup-schemes.ts",
+    "cleanup:memory": "bun run scripts/cleanup-memory.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

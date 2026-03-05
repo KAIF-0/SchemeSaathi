@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import upstashIndexService from './src/services/upstash-index.service';
-import UpstashConfig from './src/config/upstash';
+import upstashIndexService from '../src/services/upstash-index.service';
+import UpstashConfig from '../src/config/upstash';
 
 interface SchemeRecord {
 	Name: string;

@@ -1,7 +1,7 @@
 import UpstashConfig from '../config/upstash';
 import upstashIndexService from './upstash-index.service';
 
-export type MemoryRole = 'user' | 'assistant' | 'exchange' | 'summary' | 'profile' | 'meta';
+export type MemoryRole = 'user' | 'assistant' | 'exchange' | 'profile';
 
 export interface ProfileData {
     preferredLanguage?: PreferredLanguage;
@@ -35,20 +35,23 @@ class UpstashMemoryService {
     }
 
     public async getRecentConversation(namespace: string, limit = 10): Promise<MemoryRecord[]> {
-        const rows = await this.range(namespace, limit);
+        const fetchLimit = Math.max(limit * 4, 40);
+        const rows = await this.range(namespace, fetchLimit);
+        // console.log(rows)
         const conversationRows = rows.filter((item) => {
             const role = item.metadata?.role;
-            return role === 'user' || role === 'assistant' || role === 'exchange' || role === 'summary';
+            return role === 'user' || role === 'assistant' || role === 'exchange';
         });
 
         const parsed = this.expandConversationRows(conversationRows);
 
         if (parsed.length > 0) {
-            return parsed.slice(-limit);
+            return this.selectLatestByTimestamp(parsed, limit);
         }
 
-        const fallbackQuery = await this.query(namespace, 'recent conversation', limit);
-        return this.expandConversationRows(fallbackQuery);
+        const fallbackQuery = await this.query(namespace, 'recent conversation', fetchLimit);
+        const fallbackParsed = this.expandConversationRows(fallbackQuery);
+        return this.selectLatestByTimestamp(fallbackParsed, limit);
     }
 
     public async upsertConversationExchange(namespace: string, userMessage: string, assistantMessage: string): Promise<void> {
@@ -65,21 +68,6 @@ class UpstashMemoryService {
                     timestamp,
                     userMessage,
                     assistantMessage,
-                },
-            },
-        ]);
-    }
-
-    public async upsertSummary(namespace: string, content: string): Promise<void> {
-        const timestamp = new Date().toISOString();
-        const id = `${timestamp}_summary_${Math.random().toString(36).slice(2, 10)}`;
-        await this.upsert(namespace, [
-            {
-                id,
-                data: content,
-                metadata: {
-                    role: 'summary',
-                    timestamp,
                 },
             },
         ]);
@@ -111,27 +99,6 @@ class UpstashMemoryService {
                 },
             },
         ]);
-    }
-
-    public async incrementUserTurn(namespace: string): Promise<number> {
-        const fetched = await this.fetchById(namespace, 'user_turn_counter');
-        const current = Number(fetched?.metadata?.count ?? 0);
-        const nextCount = Number.isFinite(current) ? current + 1 : 1;
-        const timestamp = new Date().toISOString();
-
-        await this.upsert(namespace, [
-            {
-                id: 'user_turn_counter',
-                data: String(nextCount),
-                metadata: {
-                    role: 'meta',
-                    count: nextCount,
-                    timestamp,
-                },
-            },
-        ]);
-
-        return nextCount;
     }
 
     public async querySchemes(question: string, topK = 5): Promise<UpstashVectorMatch[]> {
@@ -183,8 +150,17 @@ class UpstashMemoryService {
             includeMetadata: true,
         }, { namespace });
 
-        const normalized = this.normalizeMatches(response);
-        return normalized.reverse();
+        return this.normalizeMatches(response);
+    }
+
+    private selectLatestByTimestamp(rows: MemoryRecord[], limit: number): MemoryRecord[] {
+        if (rows.length <= limit) {
+            return rows.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        }
+
+        const sortedDesc = [...rows].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+        const latest = sortedDesc.slice(0, limit);
+        return latest.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     }
 
     private async fetchById(namespace: string, id: string): Promise<UpstashVectorMatch | null> {

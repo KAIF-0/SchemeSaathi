@@ -26,10 +26,16 @@ class WebhookController {
         console.log('Message from:', incomingMessage.from);
         console.log('Text:', incomingMessage.text);
 
-        const reply = await WebhookController.messageService.generateReply(
-            incomingMessage.phoneNumber,
-            incomingMessage.text
-        );
+        let reply: string;
+        try {
+            reply = await WebhookController.messageService.generateReply(
+                incomingMessage.phoneNumber,
+                incomingMessage.text
+            );
+        } catch (error) {
+            console.error('Failed to generate reply:', error);
+            reply = 'Sorry, I am facing a temporary delay. Please try again in a moment.';
+        }
         const xmlResponse = WebhookController.twilioWhatsAppService.createXmlResponse(reply);
 
         return c.body(xmlResponse, 200, {

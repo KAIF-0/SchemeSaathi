@@ -8,6 +8,7 @@ interface SchemeRecord {
 	SubHead?: string;
 	Desc?: string;
 	Tags?: string[];
+	Link?: string;
 }
 
 type SeedPayload = SchemeRecord[] | { schemes?: SchemeRecord[] };
@@ -67,6 +68,7 @@ async function seedSchemes(): Promise<void> {
 			subHead: scheme.SubHead ?? '',
 			desc: scheme.Desc ?? '',
 			tags: scheme.Tags ?? [],
+			link: scheme.Link ?? '',
 		},
 	}));
 
@@ -85,4 +87,3 @@ seedSchemes().catch((error: unknown) => {
 	console.error(`Schemes seed failed: ${message}`);
 	process.exit(1);
 });
-

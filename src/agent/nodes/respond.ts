@@ -8,14 +8,13 @@ export async function respond(state: AgentState): Promise<Partial<AgentState>> {
         };
     }
 
-    if (state.intent === 'scheme_query' && state.ragContext) {
+    if (state.ragContext) {
         return {
             finalResponse: state.ragContext,
         };
     }
-
+    // console.log(state.memoryContext);
     const preferredLanguage = state.profile?.preferredLanguage === 'hindi' ? 'Hindi' : 'English';
-    console.log(state.memoryContext);
     const response = await llmService.generate(
         'You are a helpful WhatsApp assistant for Indian welfare scheme support. Return plain text only with no markdown.',
         [

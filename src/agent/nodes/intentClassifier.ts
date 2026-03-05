@@ -1,24 +1,6 @@
 import type { AgentState, IntentType } from '../state';
 import llmService from '../../services/llm';
-
-const validIntents: IntentType[] = ['scheme_query', 'general_query', 'profile_update', 'unknown'];
-
-function parseIntent(raw: string): IntentType {
-    const normalized = raw.trim().toLowerCase();
-    const direct = normalized.replace(/[^a-z_]/g, '');
-
-    if (validIntents.includes(direct as IntentType)) {
-        return direct as IntentType;
-    }
-
-    for (const intent of validIntents) {
-        if (normalized.includes(intent)) {
-            return intent;
-        }
-    }
-
-    return 'unknown';
-}
+import { getIntentLabels, parseIntent } from './helpers/intent.helper';
 
 export async function intentClassifier(state: AgentState): Promise<Partial<AgentState>> {
     const prompt = [
@@ -26,7 +8,8 @@ export async function intentClassifier(state: AgentState): Promise<Partial<Agent
         `Profile: ${JSON.stringify(state.profile ?? {})}`,
         `Memory: ${state.memoryContext || 'none'}`,
         'Classify intent into exactly one label:',
-        'scheme_query, general_query, profile_update, unknown',
+        getIntentLabels(),
+        'If user asks about previously suggested schemes, previously shared results, or first/second scheme details, return memory_query.',
         'Return only the label.',
     ].join('\n');
 
@@ -36,6 +19,7 @@ export async function intentClassifier(state: AgentState): Promise<Partial<Agent
     );
 
     const intent = parseIntent(rawIntent);
+    console.log(`Classified intent: ${intent}`);
 
     return {
         intent,

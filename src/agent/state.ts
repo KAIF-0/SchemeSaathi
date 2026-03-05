@@ -1,7 +1,7 @@
 import { Annotation } from '@langchain/langgraph';
 import type { ProfileData, ProfileField } from '../services/upstash-memory.service';
 
-export type IntentType = 'scheme_query' | 'general_query' | 'profile_update' | 'unknown';
+export type IntentType = 'scheme_query' | 'memory_query' | 'general_query' | 'profile_update' | 'unknown';
 
 export interface AgentInput {
     phoneNumber: string;
@@ -17,6 +17,7 @@ export const AgentStateAnnotation = Annotation.Root({
     missingField: Annotation<ProfileField | null>(),
     intent: Annotation<IntentType>(),
     requiresSchemeRag: Annotation<boolean>(),
+    schemeQueryText: Annotation<string>(),
     ragContext: Annotation<string>(),
     finalResponse: Annotation<string>(),
     shouldEndAfterValidation: Annotation<boolean>(),

@@ -3,6 +3,7 @@ import { AgentStateAnnotation, type AgentInput } from './state';
 import { retrieveMemory } from './nodes/retrieveMemory';
 import { validateProfile } from './nodes/validateProfile';
 import { intentClassifier } from './nodes/intentClassifier';
+import { memoryQuery } from './nodes/memoryQuery';
 import { schemeRAG } from './nodes/schemeRAG';
 import { respond } from './nodes/respond';
 import { updateMemory } from './nodes/updateMemory';
@@ -11,6 +12,7 @@ const graphBuilder = new StateGraph(AgentStateAnnotation)
     .addNode('retrieveMemory', retrieveMemory)
     .addNode('validateProfile', validateProfile)
     .addNode('intentClassifier', intentClassifier)
+    .addNode('memoryQuery', memoryQuery)
     .addNode('schemeRAG', schemeRAG)
     .addNode('respond', respond)
     .addNode('updateMemory', updateMemory)
@@ -23,6 +25,16 @@ const graphBuilder = new StateGraph(AgentStateAnnotation)
         intentClassifier: 'intentClassifier',
     })
     .addConditionalEdges('intentClassifier', (state) => {
+        if (state.intent === 'memory_query') {
+            return 'memoryQuery';
+        }
+        return state.requiresSchemeRag ? 'schemeRAG' : 'respond';
+    }, {
+        memoryQuery: 'memoryQuery',
+        schemeRAG: 'schemeRAG',
+        respond: 'respond',
+    })
+    .addConditionalEdges('memoryQuery', (state) => {
         return state.requiresSchemeRag ? 'schemeRAG' : 'respond';
     }, {
         schemeRAG: 'schemeRAG',
@@ -44,10 +56,11 @@ export async function runWhatsappAgent(input: AgentInput): Promise<string> {
         missingField: null,
         intent: 'unknown',
         requiresSchemeRag: false,
+        schemeQueryText: '',
         ragContext: '',
         finalResponse: '',
         shouldEndAfterValidation: false,
     });
 
-    return (result.finalResponse || 'I am unable to respond right now. Please try again.').trim();
+    return (result.finalResponse || '').trim();
 }

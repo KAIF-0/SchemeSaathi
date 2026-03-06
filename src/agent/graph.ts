@@ -4,6 +4,7 @@ import { retrieveMemory } from './nodes/retrieveMemory';
 import { validateProfile } from './nodes/validateProfile';
 import { intentClassifier } from './nodes/intentClassifier';
 import { memoryQuery } from './nodes/memoryQuery';
+import { profileUpdate } from './nodes/profileUpdate';
 import { schemeRAG } from './nodes/schemeRAG';
 import { respond } from './nodes/respond';
 import { updateMemory } from './nodes/updateMemory';
@@ -13,6 +14,7 @@ const graphBuilder = new StateGraph(AgentStateAnnotation)
     .addNode('validateProfile', validateProfile)
     .addNode('intentClassifier', intentClassifier)
     .addNode('memoryQuery', memoryQuery)
+    .addNode('profileUpdate', profileUpdate)
     .addNode('schemeRAG', schemeRAG)
     .addNode('respond', respond)
     .addNode('updateMemory', updateMemory)
@@ -28,9 +30,13 @@ const graphBuilder = new StateGraph(AgentStateAnnotation)
         if (state.intent === 'memory_query') {
             return 'memoryQuery';
         }
+        if (state.intent === 'profile_update') {
+            return 'profileUpdate';
+        }
         return state.requiresSchemeRag ? 'schemeRAG' : 'respond';
     }, {
         memoryQuery: 'memoryQuery',
+        profileUpdate: 'profileUpdate',
         schemeRAG: 'schemeRAG',
         respond: 'respond',
     })
@@ -40,6 +46,7 @@ const graphBuilder = new StateGraph(AgentStateAnnotation)
         schemeRAG: 'schemeRAG',
         respond: 'respond',
     })
+    .addEdge('profileUpdate', 'respond')
     .addEdge('schemeRAG', 'respond')
     .addEdge('respond', 'updateMemory')
     .addEdge('updateMemory', END);

@@ -24,5 +24,6 @@ export async function intentClassifier(state: AgentState): Promise<Partial<Agent
     return {
         intent,
         requiresSchemeRag: intent === 'scheme_query',
+        schemeQueryText: '',
     };
 }

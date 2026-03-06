@@ -1,6 +1,7 @@
 import type { AgentState } from '../state';
 import upstashMemoryService from '../../services/upstash-memory.service';
 import llmService from '../../services/llm';
+import AppConfig from '../../config/app';
 import {
     buildProfileAwareSearchQuery,
     extractSchemes,
@@ -38,7 +39,7 @@ export async function schemeRAG(state: AgentState): Promise<Partial<AgentState>>
     const preferredLanguage = state.profile?.preferredLanguage === 'hindi' ? 'Hindi' : 'English';
 
     const ragAnswer = await llmService.generate(
-        'You provide Indian government scheme guidance based only on retrieved scheme snippets and user profile.',
+        `You are ${AppConfig.APP_NAME}. You provide Indian government scheme guidance based only on retrieved scheme snippets and user profile.`,
         [
             `Respond strictly in ${preferredLanguage}.`,
             `User profile: ${JSON.stringify(state.profile ?? {})}`,

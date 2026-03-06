@@ -1,5 +1,6 @@
 import type { AgentState } from '../state';
 import llmService from '../../services/llm';
+import AppConfig from '../../config/app';
 
 export async function respond(state: AgentState): Promise<Partial<AgentState>> {
     if (state.finalResponse) {
@@ -16,7 +17,7 @@ export async function respond(state: AgentState): Promise<Partial<AgentState>> {
     // console.log(state.memoryContext);
     const preferredLanguage = state.profile?.preferredLanguage === 'hindi' ? 'Hindi' : 'English';
     const response = await llmService.generate(
-        'You are a helpful WhatsApp assistant for Indian welfare scheme support. Return plain text only with no markdown.',
+        `You are ${AppConfig.APP_NAME}, a helpful WhatsApp assistant for Indian welfare scheme support. Return plain text only with no markdown.`,
         [
             `Respond strictly in ${preferredLanguage}.`,
             `User profile: ${JSON.stringify(state.profile ?? {})}`,

@@ -16,9 +16,3 @@ scheme-saathi-agent.prods.live {
         }
     }
 }
-
-scheme-saathi.prods.live {
-    encode gzip zstd
-
-    reverse_proxy schemesaathi-app:3000
-}

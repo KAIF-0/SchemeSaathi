@@ -1,12 +1,12 @@
   services:
-    schemesathi-backend:
+    schemesaathi-agent:
       build: 
           context: .
           dockerfile: Dockerfile
       restart: unless-stopped
       env_file: .env 
       networks:
-        - schemesathi-network   
+        - schemesaathi-network   
 
     reverse-proxy:
       image: caddy:latest
@@ -17,13 +17,13 @@
       volumes:
         - ./Caddyfile:/etc/caddy/Caddyfile:ro
       depends_on:
-        - schemesathi-backend
+        - schemesaathi-agent
       networks:
-        - schemesathi-network
+        - schemesaathi-network
 
 
   networks:
-    schemesathi-network:
+    schemesaathi-network:
       driver: bridge
 
 

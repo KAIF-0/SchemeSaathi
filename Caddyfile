@@ -1,4 +1,4 @@
-scheme-saathi-agent.prods.live {
+agent.scheme-saathi.prods.live {
     encode gzip zstd
 
     header {

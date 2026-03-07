@@ -16,3 +16,16 @@ scheme-saathi-agent.prods.live {
         }
     }
 }
+
+scheme-saathi.prods.live {
+
+    encode gzip zstd
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+
+    reverse_proxy schemesaathi-app:3000
+}

@@ -6,7 +6,15 @@
       restart: unless-stopped
       env_file: .env 
       networks:
-        - schemesaathi-network   
+        - schemesaathi-network  
+
+    schemesaathi-app:
+      build: 
+          context: ../app
+          dockerfile: Dockerfile
+      restart: unless-stopped
+      networks:
+        - schemesaathi-network     
 
     reverse-proxy:
       image: caddy:latest
@@ -18,6 +26,7 @@
         - ./Caddyfile:/etc/caddy/Caddyfile:ro
       depends_on:
         - schemesaathi-agent
+        - schemesaathi-app
       networks:
         - schemesaathi-network
 

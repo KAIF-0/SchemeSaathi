@@ -8,6 +8,7 @@
     "dev": "bun run --hot index.ts",
     "lint": "bunx tsc --init",
     "seed:schemes": "bun run scripts/seed.ts",
+    "feed:schemes": "bun run scripts/feed-generated-schemes.ts",
     "cleanup:schemes": "bun run scripts/cleanup-schemes.ts",
     "cleanup:memory": "bun run scripts/cleanup-memory.ts"
   },

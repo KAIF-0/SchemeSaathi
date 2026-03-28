@@ -1,4 +1,4 @@
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatOpenAI } from '@langchain/openai';
 import LlmConfig from '../config/llm';
 
 export class LlmTimeoutError extends Error {
@@ -9,9 +9,12 @@ export class LlmTimeoutError extends Error {
 }
 
 class LlmService {
-    private readonly model = new ChatGoogleGenerativeAI({
-        apiKey: LlmConfig.GOOGLE_API_KEY,
+    private readonly model = new ChatOpenAI({
+        apiKey: LlmConfig.OPENAI_API_KEY,
         model: LlmConfig.MODEL,
+        configuration: {
+            baseURL: LlmConfig.BASE_URL,
+        },
         temperature: LlmConfig.TEMPERATURE,
     });
 
